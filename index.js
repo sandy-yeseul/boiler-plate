@@ -9,7 +9,7 @@ const user = require('./models/user');
 const {auth} = require('./middleware/auth');
 
 const app = express();
-const port = 3000;
+const port = 5000;
 
 //db connection
 mongoose.connect(config.mongoURI, 
@@ -20,18 +20,19 @@ mongoose.connect(config.mongoURI,
 app.use(bodyParser.urlencoded({extended: true}));
 // json
 app.use(bodyParser.json());
+app.use(cp());
 
 app.get('/', (req, res) => res.send('Ello Orld!'));
 // register
-app.post('api/users/register', (req, res) => {
+app.post('/api/users/register', (req, res) => {
     const user = new User(req.body);
     user.save((err, userInfo)=>{
         if(err) return res.json({success: false, err})
         return res.status(200).json({success: true})
     });
-})
+});
 // login
-app.post('api/users/login', (req, res) =>{
+app.post('/api/users/login', (req, res) =>{
     // find email in DB
     User.findOne({email: req.body.email}, (err, user) => {
         if(!user){
@@ -56,7 +57,7 @@ app.post('api/users/login', (req, res) =>{
     });
 });
 // authentication
-app.get('api/users/auth', auth, (req, res) =>{
+app.get('/api/users/auth', auth, (req, res) =>{
     // meaning that this function is executed, through middleware the authentication is true
     res.status(200).json({
         _id: req.user._id,
@@ -67,6 +68,17 @@ app.get('api/users/auth', auth, (req, res) =>{
         lastname: req.user.lastname,
         role: req.user.role,
         image: req.user.image
+    });
+});
+// logout
+app.get('/api/users/logout', auth, (req, res) => {
+    User.findOneAndUpdate({_id: req.user._id}, {token: ""}, 
+    (err, user) => {
+        if(err) return res.json({success: false, err});
+        return res.status(200).send({
+            success: true, 
+            user: user
+        });
     });
 });
 
