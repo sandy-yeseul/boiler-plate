@@ -23,6 +23,7 @@ app.use(bodyParser.json());
 app.use(cp());
 
 app.get('/', (req, res) => res.send('Ello Orld!'));
+app.get('/api/hello', (req, res) => res.send('hihihihi'))
 // register
 app.post('/api/users/register', (req, res) => {
     const user = new User(req.body);
